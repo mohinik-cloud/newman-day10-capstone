@@ -27,6 +27,20 @@ jobs:
 
       - name: Run Postman Collection
         run: |
-          newman run collections/"Football API Capstone Project.postman_collection.json" -e collections/"Capstone.postman_environment.json" ^
-          -d collections/data.json ^
-          -r htmlextra --reporter-htmlextra-export results/results.html
+          newman run "collections/Football API Capstone Project.postman_collection.json" -e "collections/Capstone.postman_environment.json" \
+          --iteration-data "collections/data.json" \
+          -r json,htmlextra \
+          --reporter-json-export results/results.json \
+          --reporter-htmlextra-export results/results.html
+
+      - name: Upload JSON Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-json-results
+          path: results/results.json
+
+      - name: Upload HTML Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-html-report
+          path: results/results.html
