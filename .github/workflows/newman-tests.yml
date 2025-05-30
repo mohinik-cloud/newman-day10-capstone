@@ -1,0 +1,33 @@
+name: Run Newman Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install Newman and HTML Extra Reporter
+        run: |
+          npm install -g newman
+          npm install -g newman-reporter-htmlextra
+
+      - name: Run Postman Collection
+        run: |
+          newman run collections/"Football API Capstone Project.postman_collection.json" ^
+          -e collections/"Capstone.postman_environment.json" ^
+          -d collections/data.json ^
+          -r htmlextra --reporter-htmlextra-export results/results.html

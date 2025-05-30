@@ -1,0 +1,670 @@
+{
+	"info": {
+		"_postman_id": "345b12ac-e014-4c3e-a006-d7a68161f26e",
+		"name": "Football API Capstone Project",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45174253",
+		"_collection_link": "https://mohinikunwar.postman.co/workspace/API-Testing-Lab~6cecd969-3b25-4c07-8088-65158175be9d/collection/45174253-345b12ac-e014-4c3e-a006-d7a68161f26e?action=share&source=collection_link&creator=45174253"
+	},
+	"item": [
+		{
+			"name": "Get All Leagues",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"try {\r",
+							"    const res = pm.response.json();\r",
+							"\r",
+							"    pm.test(\"Status is 200\", () => {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Handle rate limit or valid data\", () => {\r",
+							"        if (res.errors && res.errors.token) {\r",
+							"            console.log(\"Rate limit reached or token error:\", res.errors.token);\r",
+							"        } else {\r",
+							"            pm.expect(res.response).to.be.an(\"array\");\r",
+							"        }\r",
+							"    });\r",
+							"} catch (e) {\r",
+							"    console.log(\"Error parsing response:\", e);\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-rapidapi-host",
+						"value": "{{football_baseUrl}}",
+						"type": "text"
+					},
+					{
+						"key": "x-rapidapi-key",
+						"value": "{{aap_id}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{football_baseUrl}}/countries",
+					"host": [
+						"{{football_baseUrl}}"
+					],
+					"path": [
+						"countries"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Bad League Id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const res = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Invalid input scenario test\", () => {\r",
+							"    pm.expect([200, 400, 403, 429]).to.include(pm.response.code);\r",
+							"\r",
+							"    if (pm.response.code === 200) {\r",
+							"        pm.expect(res.results).to.eql(0);\r",
+							"        pm.expect(res.response).to.be.an(\"array\").that.is.empty;\r",
+							"    } else {\r",
+							"        pm.expect(res.errors).to.exist;\r",
+							"    }\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-rapidapi-host",
+						"value": "{{football_baseUrl}}",
+						"type": "text"
+					},
+					{
+						"key": "x-rapidapi-key",
+						"value": "{{aap_id}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{football_baseUrl}}/teams?country=England&season=2022&league=999999",
+					"host": [
+						"{{football_baseUrl}}"
+					],
+					"path": [
+						"teams"
+					],
+					"query": [
+						{
+							"key": "country",
+							"value": "England"
+						},
+						{
+							"key": "season",
+							"value": "2022"
+						},
+						{
+							"key": "league",
+							"value": "999999"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Leagues by season",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"try {\r",
+							"    pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));\r",
+							"    const res = pm.response.json();\r",
+							"    pm.test(\"Response is array\", () => pm.expect(res.response).to.be.an(\"array\"));\r",
+							"} catch (e) {\r",
+							"    console.log(\"Error: \", e);\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-rapidapi-host",
+						"value": "{{football_baseUrl}}",
+						"type": "text"
+					},
+					{
+						"key": "x-rapidapi-key",
+						"value": "{{aap_id}}",
+						"type": "text"
+					},
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{football_baseUrl}}/leagues?season={{season}}",
+					"host": [
+						"{{football_baseUrl}}"
+					],
+					"path": [
+						"leagues"
+					],
+					"query": [
+						{
+							"key": "season",
+							"value": "{{season}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Teams by country, season & league",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const countryPassed = pm.iterationData.get(\"country\") || pm.environment.get(\"country\");\r",
+							"const res = pm.response.json();\r",
+							"\r",
+							"pm.test(\"All teams belong to the requested country\", () => {\r",
+							"    res.response.forEach(team => {\r",
+							"        pm.expect(team.team.country).to.eql(countryPassed);\r",
+							"        console.log(\"Team:\", team.team.name, \"| Country:\", team.team.country);\r",
+							"    });\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-rapidapi-host",
+						"value": "{{football_baseUrl}}",
+						"type": "text"
+					},
+					{
+						"key": "x-rapidapi-key",
+						"value": "{{aap_id}}",
+						"type": "text"
+					},
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{football_baseUrl}}/teams?country={{country}}&season={{season}}&league={{league}}",
+					"host": [
+						"{{football_baseUrl}}"
+					],
+					"path": [
+						"teams"
+					],
+					"query": [
+						{
+							"key": "country",
+							"value": "{{country}}"
+						},
+						{
+							"key": "season",
+							"value": "{{season}}"
+						},
+						{
+							"key": "league",
+							"value": "{{league}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Standings by league & season",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"try {\r",
+							"    pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));\r",
+							"    const res = pm.response.json();\r",
+							"    pm.test(\"Response is array\", () => pm.expect(res.response).to.be.an(\"array\"));\r",
+							"} catch (e) {\r",
+							"    console.log(\"Error: \", e);\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-rapidapi-host",
+						"value": "{{football_baseUrl}}",
+						"type": "text"
+					},
+					{
+						"key": "x-rapidapi-key",
+						"value": "{{aap_id}}",
+						"type": "text"
+					},
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{football_baseUrl}}/standings?league={{league}}&season={{season}}",
+					"host": [
+						"{{football_baseUrl}}"
+					],
+					"path": [
+						"standings"
+					],
+					"query": [
+						{
+							"key": "league",
+							"value": "{{league}}"
+						},
+						{
+							"key": "season",
+							"value": "{{season}}"
+						},
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Standings by league & season Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"try {\r",
+							"    pm.test(\"Status code is 200\", () => pm.response.to.have.status(200));\r",
+							"    const res = pm.response.json();\r",
+							"    pm.test(\"Response is array\", () => pm.expect(res.response).to.be.an(\"array\"));\r",
+							"} catch (e) {\r",
+							"    console.log(\"Error: \", e);\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-rapidapi-host",
+						"value": "{{football_baseUrl}}",
+						"type": "text"
+					},
+					{
+						"key": "x-rapidapi-key",
+						"value": "{{aap_id}}",
+						"type": "text"
+					},
+					{
+						"key": "",
+						"value": "",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{football_baseUrl}}/players/topscorers?league={{league}}&season={{season}}",
+					"host": [
+						"{{football_baseUrl}}"
+					],
+					"path": [
+						"players",
+						"topscorers"
+					],
+					"query": [
+						{
+							"key": "league",
+							"value": "{{league}}"
+						},
+						{
+							"key": "season",
+							"value": "{{season}}"
+						},
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"try {\r",
+							"    const res = pm.response.json();\r",
+							"    pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));\r",
+							"    pm.test(\"Echoed teamId matches\", () => {\r",
+							"        const sentTeamId = res.data.team;\r",
+							"        const envTeamId = pm.environment.get(\"teamId\");\r",
+							"        pm.expect(Number(sentTeamId)).to.eql(Number(envTeamId));\r",
+							"    });\r",
+							"} catch (e) {\r",
+							"    console.log(\"Error:\", e);\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let ids = [10, 21, 33, 42];\r",
+							"let randomTeam = ids[Math.floor(Math.random() * ids.length)];\r",
+							"pm.environment.set(\"teamId\", randomTeam);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"team\": \"{{teamId}}\",\r\n  \"action\": \"subscribe\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://postman-echo.com/post",
+					"protocol": "https",
+					"host": [
+						"postman-echo",
+						"com"
+					],
+					"path": [
+						"post"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PUT",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let ids = [10, 21, 33, 42];\r",
+							"let randomTeam = ids[Math.floor(Math.random() * ids.length)];\r",
+							"pm.environment.set(\"teamId\", randomTeam);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"try {\r",
+							"    const res = pm.response.json();\r",
+							"    pm.test(\"Status 200 OK\", () => pm.response.to.have.status(200));\r",
+							"    pm.test(\"Status matches\", () => {\r",
+							"        pm.expect(res.data.status).to.eql(\"inactive\");\r",
+							"    });\r",
+							"} catch (e) {\r",
+							"    console.log(\"Error:\", e);\r",
+							"}\r",
+							"pm.test(\"Response time is less than 200ms\", function () {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"team\": \"{{teamId}}\",\r\n  \"status\": \"inactive\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://postman-echo.com/put",
+					"protocol": "https",
+					"host": [
+						"postman-echo",
+						"com"
+					],
+					"path": [
+						"put"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"try {\r",
+							"    const res = pm.response.json();\r",
+							"    pm.test(\"DELETE response contains correct team ID\", () => {\r",
+							"        pm.expect(res.data.team).to.eql(pm.environment.get(\"teamId\").toString());\r",
+							"    });\r",
+							"} catch (e) {\r",
+							"    console.log(\"Test failed:\", e);\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let ids = [10, 21, 33, 42];\r",
+							"let randomTeam = ids[Math.floor(Math.random() * ids.length)];\r",
+							"pm.environment.set(\"teamId\", randomTeam);\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"team\": \"{{teamId}}\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://postman-echo.com/delete",
+					"protocol": "https",
+					"host": [
+						"postman-echo",
+						"com"
+					],
+					"path": [
+						"delete"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Teams DDT",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Log values from data file to console\r",
+							"console.log(\"Data File - country:\", pm.iterationData.get(\"country\"));\r",
+							"console.log(\"Data File - season:\", pm.iterationData.get(\"season\"));\r",
+							"console.log(\"Data File - league:\", pm.iterationData.get(\"league\"));\r",
+							"\r",
+							"// Optional test to ensure variables are present\r",
+							"pm.test(\"Check test data values\", () => {\r",
+							"    pm.expect(pm.iterationData.get(\"country\")).to.not.be.undefined;\r",
+							"    pm.expect(pm.iterationData.get(\"league\")).to.not.be.undefined;\r",
+							"    pm.expect(pm.iterationData.get(\"season\")).to.not.be.undefined;\r",
+							"});\r",
+							"\r",
+							"try {\r",
+							"    const res = pm.response.json();\r",
+							"    pm.test(\"Status code is 200\", () => {\r",
+							"        pm.response.to.have.status(200);\r",
+							"    });\r",
+							"\r",
+							"    pm.test(\"Response is array\", () => {\r",
+							"        pm.expect(res.response).to.be.an(\"array\");\r",
+							"    });\r",
+							"} catch (e) {\r",
+							"    console.log(\"Error:\", e);\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "x-rapidapi-host",
+						"value": "{{football_baseUrl}}",
+						"type": "text"
+					},
+					{
+						"key": "x-rapidapi-key",
+						"value": "{{aap_id}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{football_baseUrl}}/teams?country={{country}}&season={{season}}&league={{league}}",
+					"host": [
+						"{{football_baseUrl}}"
+					],
+					"path": [
+						"teams"
+					],
+					"query": [
+						{
+							"key": "country",
+							"value": "{{country}}"
+						},
+						{
+							"key": "season",
+							"value": "{{season}}"
+						},
+						{
+							"key": "league",
+							"value": "{{league}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
