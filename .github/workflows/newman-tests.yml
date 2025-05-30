@@ -27,7 +27,6 @@ jobs:
 
       - name: Run Postman Collection
         run: |
-          newman run collections/"Football API Capstone Project.postman_collection.json" ^
-          -e collections/"Capstone.postman_environment.json" ^
+          newman run collections/"Football API Capstone Project.postman_collection.json" -e collections/"Capstone.postman_environment.json" ^
           -d collections/data.json ^
           -r htmlextra --reporter-htmlextra-export results/results.html
